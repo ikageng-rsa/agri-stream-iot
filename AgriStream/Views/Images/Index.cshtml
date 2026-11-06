@@ -1,0 +1,38 @@
+@model List<DroneImageViewModel>
+@{
+    ViewData["Title"] = "Drone Imagery";
+    var canUpload = User.IsInRole(Roles.Farmer) || User.IsInRole(Roles.Admin);
+}
+
+<h1>Drone Imagery</h1>
+<p>High-resolution aerial images, stored in Azure Blob Storage.</p>
+
+@if (canUpload)
+{
+    <a asp-action="Upload" class="btn btn-primary mb-3">Upload Image</a>
+}
+
+<div class="row row-cols-1 row-cols-md-3 g-3">
+@foreach (var image in Model)
+{
+    <div class="col">
+        <div class="card h-100">
+            <img src="@Url.Action("GetImage", new { name = image.Name })" class="card-img-top" alt="@image.Name" loading="lazy" />
+            <div class="card-body">
+                <h6 class="card-title">@(image.FieldId ?? "Unassigned field")</h6>
+                <p class="card-text small text-muted mb-1">@image.Name</p>
+                <p class="card-text small mb-0">@(image.SizeBytes / 1024) KB &middot; @image.UploadedBy &middot; @image.LastModified?.ToString("yyyy-MM-dd HH:mm")</p>
+            </div>
+            @if (User.IsInRole(Roles.Admin))
+            {
+                <div class="card-footer bg-transparent">
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" name="name" value="@image.Name" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+}
+</div>

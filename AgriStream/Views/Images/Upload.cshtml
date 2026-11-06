@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Upload Drone Image";
+}
+
+<h1>Upload Drone Image</h1>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger" role="alert">
+        <div asp-validation-summary="All"></div>
+    </div>
+}
+
+<form asp-action="Upload" method="post" enctype="multipart/form-data" class="col-md-6">
+    <div class="mb-3">
+        <label for="fieldId" class="form-label">Field</label>
+        <input type="text" id="fieldId" name="fieldId" class="form-control" placeholder="FIELD-A" required />
+    </div>
+    <div class="mb-3">
+        <label for="file" class="form-label">Aerial image</label>
+        <input type="file" id="file" name="file" class="form-control" accept="image/*" required />
+    </div>
+    <button type="submit" class="btn btn-success">Upload</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
