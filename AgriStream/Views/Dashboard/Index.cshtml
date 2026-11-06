@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Field Dashboard";
     var latest = Model.Latest;
+    var canIrrigate = User.IsInRole(Roles.Farmer) || User.IsInRole(Roles.Admin);
 }
 
 <h1>Field Dashboard</h1>
@@ -20,6 +21,20 @@
 @if (Model.Error is not null)
 {
     <div class="alert alert-warning" role="alert">@Model.Error</div>
+}
+@if (TempData["Message"] is string message)
+{
+    <div class="alert alert-success" role="alert">@message</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+@if (Model.IsMoistureLow)
+{
+    <div class="alert alert-danger" role="alert">
+        Sensor alert: soil moisture on @Model.SelectedField is @Model.Latest!.SoilMoisture %, below the @DashboardViewModel.LowMoistureThreshold % threshold. Irrigation is recommended.
+    </div>
 }
 
 @if (Model.SelectedField is null)
@@ -61,15 +76,40 @@ else
                 <th>Valve</th>
                 <th>Status</th>
                 <th>Last Command</th>
+                @if (canIrrigate)
+                {
+                    <th></th>
+                }
             </tr>
         </thead>
         <tbody>
         @foreach (var valve in Model.Valves)
         {
+            var irrigating = valve.OperationalStatus == "Irrigating";
             <tr>
                 <td>@valve.DeviceId</td>
-                <td><span class="badge @(valve.OperationalStatus == "Irrigating" ? "bg-primary" : "bg-secondary")">@valve.OperationalStatus</span></td>
+                <td><span class="badge @(irrigating ? "bg-primary" : "bg-secondary")">@valve.OperationalStatus</span></td>
                 <td>@valve.LastCommand</td>
+                @if (canIrrigate)
+                {
+                    <td>
+                        <form asp-action="TriggerIrrigation" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="deviceId" value="@valve.DeviceId" />
+                            <input type="hidden" name="fieldId" value="@valve.FieldId" />
+                            @if (irrigating)
+                            {
+                                <input type="hidden" name="irrigationAction" value="Stop" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Stop Irrigation</button>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="irrigationAction" value="Start" />
+                                <input type="number" name="durationMinutes" value="30" min="1" max="240" class="form-control form-control-sm" style="width: 6rem" aria-label="Duration in minutes" />
+                                <button type="submit" class="btn btn-sm btn-primary">Trigger Irrigation</button>
+                            }
+                        </form>
+                    </td>
+                }
             </tr>
         }
         </tbody>
