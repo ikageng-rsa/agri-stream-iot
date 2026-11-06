@@ -1,0 +1,107 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Field Dashboard";
+    var latest = Model.Latest;
+}
+
+<h1>Field Dashboard</h1>
+<p>Latest soil telemetry, served from Azure Table Storage by the GetLatestTelemetry function.</p>
+
+<form method="get" class="d-flex gap-2 mb-3 col-md-4">
+    <select name="fieldId" class="form-select" onchange="this.form.submit()">
+        @foreach (var field in Model.Fields)
+        {
+            <option value="@field" selected="@(field == Model.SelectedField)">@field</option>
+        }
+    </select>
+    <noscript><button type="submit" class="btn btn-outline-secondary">View</button></noscript>
+</form>
+
+@if (Model.Error is not null)
+{
+    <div class="alert alert-warning" role="alert">@Model.Error</div>
+}
+
+@if (Model.SelectedField is null)
+{
+    <div class="alert alert-info" role="alert">No fields are registered yet. Add devices in the device registry first.</div>
+}
+else if (latest is null)
+{
+    <div class="alert alert-info" role="alert">No telemetry has been received for @Model.SelectedField yet.</div>
+}
+else
+{
+    <div class="row row-cols-2 row-cols-md-5 g-3 mb-4">
+        <div class="col"><div class="card text-center"><div class="card-body">
+            <div class="small text-muted">Soil moisture</div><div class="fs-4">@latest.SoilMoisture %</div>
+        </div></div></div>
+        <div class="col"><div class="card text-center"><div class="card-body">
+            <div class="small text-muted">Soil temp</div><div class="fs-4">@latest.SoilTemperature &deg;C</div>
+        </div></div></div>
+        <div class="col"><div class="card text-center"><div class="card-body">
+            <div class="small text-muted">Air temp</div><div class="fs-4">@latest.AirTemperature &deg;C</div>
+        </div></div></div>
+        <div class="col"><div class="card text-center"><div class="card-body">
+            <div class="small text-muted">Humidity</div><div class="fs-4">@latest.Humidity %</div>
+        </div></div></div>
+        <div class="col"><div class="card text-center"><div class="card-body">
+            <div class="small text-muted">Battery</div><div class="fs-4">@latest.BatteryLevel %</div>
+        </div></div></div>
+    </div>
+    <p class="small text-muted">Last reading from @latest.DeviceId at @latest.RecordedAt.ToString("yyyy-MM-dd HH:mm:ss") UTC</p>
+}
+
+@if (Model.Valves.Count > 0)
+{
+    <h4 class="mt-4">Irrigation Valves</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Valve</th>
+                <th>Status</th>
+                <th>Last Command</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var valve in Model.Valves)
+        {
+            <tr>
+                <td>@valve.DeviceId</td>
+                <td><span class="badge @(valve.OperationalStatus == "Irrigating" ? "bg-primary" : "bg-secondary")">@valve.OperationalStatus</span></td>
+                <td>@valve.LastCommand</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@if (Model.Readings.Count > 0)
+{
+    <h4 class="mt-4">Recent Readings</h4>
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Recorded (UTC)</th>
+                <th>Sensor</th>
+                <th>Soil moisture</th>
+                <th>Soil temp</th>
+                <th>Air temp</th>
+                <th>Humidity</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var reading in Model.Readings)
+        {
+            <tr>
+                <td>@reading.RecordedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@reading.DeviceId</td>
+                <td>@reading.SoilMoisture %</td>
+                <td>@reading.SoilTemperature &deg;C</td>
+                <td>@reading.AirTemperature &deg;C</td>
+                <td>@reading.Humidity %</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

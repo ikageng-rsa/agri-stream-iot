@@ -29,6 +29,9 @@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Images" asp-action="Index">Drone Imagery</a>
                             </li>
                             <li class="nav-item">
