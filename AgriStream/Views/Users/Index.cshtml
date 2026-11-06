@@ -1,0 +1,50 @@
+@model List<User>
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<h1>User Management</h1>
+<p>User accounts and system roles, stored in Azure SQL Database.</p>
+
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Created</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.Username</td>
+            <td>
+                <form asp-action="AssignRole" method="post" class="d-flex gap-2">
+                    <input type="hidden" name="id" value="@user.Id" />
+                    <select name="role" class="form-select form-select-sm w-auto">
+                        @foreach (var role in Roles.All)
+                        {
+                            <option value="@role" selected="@(role == user.Role)">@role</option>
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Assign</button>
+                </form>
+            </td>
+            <td>@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>
+                <form asp-action="Delete" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@user.Id" />
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
