@@ -5,7 +5,7 @@
 }
 
 <h1>Drone Imagery</h1>
-<p>High-resolution aerial images, stored in Azure Blob Storage.</p>
+<p>High-resolution aerial images, stored in Azure Blob Storage. Each upload is audited by the LogDroneImageUpload function into Azure Table Storage.</p>
 
 @if (canUpload)
 {
@@ -19,7 +19,10 @@
         <div class="card h-100">
             <img src="@Url.Action("GetImage", new { name = image.Name })" class="card-img-top" alt="@image.Name" loading="lazy" />
             <div class="card-body">
-                <h6 class="card-title">@(image.FieldId ?? "Unassigned field")</h6>
+                <h6 class="card-title d-flex justify-content-between">
+                    <span>@(image.FieldId ?? "Unassigned field")</span>
+                    <span class="badge @(image.AuditStatus == "Pending" ? "bg-warning text-dark" : "bg-success")" title="@image.AuditedAt?.ToString("yyyy-MM-dd HH:mm:ss")">@image.AuditStatus</span>
+                </h6>
                 <p class="card-text small text-muted mb-1">@image.Name</p>
                 <p class="card-text small mb-0">@(image.SizeBytes / 1024) KB &middot; @image.UploadedBy &middot; @image.LastModified?.ToString("yyyy-MM-dd HH:mm")</p>
             </div>

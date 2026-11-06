@@ -1,5 +1,7 @@
 using AgriStream.Models;
 using AgriStream.Shared;
+using AgriStream.Shared.Models;
+using Azure.Data.Tables;
 using AgriStream.ViewModels;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -13,11 +15,14 @@ public class ImagesController : Controller
     private const long MaxUploadBytes = 100 * 1024 * 1024;
 
     private readonly BlobContainerClient _container;
+    private readonly TableClient _auditTable;
 
-    public ImagesController(BlobServiceClient blobServiceClient)
+    public ImagesController(BlobServiceClient blobServiceClient, TableServiceClient tableServiceClient)
     {
         _container = blobServiceClient.GetBlobContainerClient(StorageNames.DroneImagesContainer);
         _container.CreateIfNotExists();
+        _auditTable = tableServiceClient.GetTableClient(StorageNames.ImageAuditTable);
+        _auditTable.CreateIfNotExists();
     }
 
     public async Task<IActionResult> Index()
@@ -35,6 +40,22 @@ public class ImagesController : Controller
                 SizeBytes = blob.Properties.ContentLength ?? 0,
                 LastModified = blob.Properties.LastModified
             });
+        }
+
+        // Audit rows are written by the LogDroneImageUpload blob-triggered function.
+        var audits = new Dictionary<string, ImageAudit>();
+        await foreach (var audit in _auditTable.QueryAsync<ImageAudit>(a => a.PartitionKey == "DroneImage"))
+        {
+            audits[audit.BlobName] = audit;
+        }
+
+        foreach (var item in items)
+        {
+            if (audits.TryGetValue(item.Name, out var audit))
+            {
+                item.AuditStatus = audit.Status;
+                item.AuditedAt = audit.ProcessedAt;
+            }
         }
 
         return View(items.OrderByDescending(b => b.LastModified).ToList());
