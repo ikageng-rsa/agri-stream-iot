@@ -18,6 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Reads APPLICATIONINSIGHTS_CONNECTION_STRING; requests, dependencies (SQL, Storage, Functions) and
+// performance counters are collected automatically for monitoring under load.
+builder.Services.AddApplicationInsightsTelemetry();
+
 var storageConnectionString = builder.Configuration.GetConnectionString("AzureStorage")
     ?? throw new InvalidOperationException("Connection string 'AzureStorage' not found.");
 
