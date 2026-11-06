@@ -1,6 +1,7 @@
 using System.Globalization;
 using AgriStream.Data;
 using AgriStream.Models;
+using AgriStream.Services;
 using Azure.Data.Tables;
 using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
@@ -43,6 +44,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Every page requires a signed-in user unless marked [AllowAnonymous].
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+
+var functionsBaseUrl = builder.Configuration["Functions:BaseUrl"]
+    ?? throw new InvalidOperationException("Configuration 'Functions:BaseUrl' not found.");
+
+builder.Services.AddHttpClient<FunctionsApiClient>(client =>
+{
+    client.BaseAddress = new Uri(functionsBaseUrl.Trim().TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
 
 var app = builder.Build();
 
