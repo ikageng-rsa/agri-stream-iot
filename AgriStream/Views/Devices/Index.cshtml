@@ -6,9 +6,19 @@
 <h1>Device Registry</h1>
 <p>Master registry of field devices and their operational status, stored in Azure SQL Database.</p>
 
+@if (TempData["Message"] is string message)
+{
+    <div class="alert alert-success" role="alert">@message</div>
+}
+
 @if (User.IsInRole(Roles.Admin))
 {
-    <a asp-action="Create" class="btn btn-primary mb-3">Register Device</a>
+    <div class="d-flex gap-2 mb-3">
+        <a asp-action="Create" class="btn btn-primary">Register Device</a>
+        <form asp-action="SeedTelemetry" method="post" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary">Seed Sensor Telemetry</button>
+        </form>
+    </div>
 }
 
 <table class="table table-striped">
