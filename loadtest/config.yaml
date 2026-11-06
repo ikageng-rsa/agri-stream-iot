@@ -1,0 +1,14 @@
+version: v0.1
+testId: agri-stream-peak-load
+displayName: Agri-Stream peak daylight load
+description: Concurrent farmers on field dashboards plus sensor telemetry and irrigation API traffic.
+testPlan: agri-stream-load.jmx
+testType: JMX
+engineInstances: 1
+failureCriteria:
+  - avg(response_time_ms) > 2000
+  - p90(response_time_ms) > 4000
+  - percentage(error) > 5
+autoStop:
+  errorPercentage: 50
+  timeWindow: 60
