@@ -1,0 +1,38 @@
+@model List<Device>
+@{
+    ViewData["Title"] = "Device Registry";
+}
+
+<h1>Device Registry</h1>
+<p>Master registry of field devices and their operational status, stored in Azure SQL Database.</p>
+
+@if (User.IsInRole(Roles.Admin))
+{
+    <a asp-action="Create" class="btn btn-primary mb-3">Register Device</a>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Device</th>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Last Command</th>
+            <th>Last Updated (UTC)</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var device in Model)
+    {
+        <tr>
+            <td>@device.DeviceId</td>
+            <td>@device.FieldId</td>
+            <td>@device.DeviceType</td>
+            <td><span class="badge @(device.OperationalStatus == "Irrigating" ? "bg-primary" : "bg-secondary")">@device.OperationalStatus</span></td>
+            <td>@device.LastCommand</td>
+            <td>@device.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")</td>
+        </tr>
+    }
+    </tbody>
+</table>

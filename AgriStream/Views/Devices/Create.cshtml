@@ -1,0 +1,33 @@
+@model Device
+@{
+    ViewData["Title"] = "Register Device";
+}
+
+<h1>Register Device</h1>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger" role="alert">
+        <div asp-validation-summary="All"></div>
+    </div>
+}
+
+<form asp-action="Create" method="post" class="col-md-6">
+    <div class="mb-3">
+        <label asp-for="DeviceId" class="form-label">Device ID</label>
+        <input asp-for="DeviceId" class="form-control" placeholder="VALVE-004" required />
+    </div>
+    <div class="mb-3">
+        <label asp-for="FieldId" class="form-label">Field</label>
+        <input asp-for="FieldId" class="form-control" placeholder="FIELD-D" required />
+    </div>
+    <div class="mb-3">
+        <label asp-for="DeviceType" class="form-label">Type</label>
+        <select asp-for="DeviceType" class="form-select">
+            <option>IrrigationValve</option>
+            <option>SoilSensor</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
