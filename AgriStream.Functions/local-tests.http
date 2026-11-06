@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:7071
+
+### Get Latest Telemetry (Table Storage read)
+GET {{baseUrl}}/api/GetLatestTelemetry?fieldId=FIELD-A&take=10
+
+### Trigger Irrigation - start (Queue write, picked up by ProcessIrrigationCommand)
+POST {{baseUrl}}/api/TriggerIrrigation
+Content-Type: application/json
+
+{
+  "DeviceId": "VALVE-001",
+  "FieldId": "FIELD-A",
+  "Action": "Start",
+  "DurationMinutes": 45,
+  "Source": "User",
+  "RequestedBy": "local-test"
+}
+
+### Trigger Irrigation - automated sensor alert
+POST {{baseUrl}}/api/TriggerIrrigation
+Content-Type: application/json
+
+{
+  "DeviceId": "VALVE-002",
+  "FieldId": "FIELD-B",
+  "Action": "Start",
+  "DurationMinutes": 20,
+  "Source": "Sensor",
+  "RequestedBy": "SENSOR-B1"
+}
+
+### Trigger Irrigation - stop
+POST {{baseUrl}}/api/TriggerIrrigation
+Content-Type: application/json
+
+{
+  "DeviceId": "VALVE-001",
+  "FieldId": "FIELD-A",
+  "Action": "Stop",
+  "Source": "User",
+  "RequestedBy": "local-test"
+}
+
+### LogDroneImageUpload is blob-triggered: upload TestFiles/sample-drone-image.jpg
+### to the drone-images container (via the web app or Storage Explorer) to fire it.
