@@ -1,7 +1,9 @@
 using System.Globalization;
+using AgriStream.Data;
 using Azure.Data.Tables;
 using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
+using Microsoft.EntityFrameworkCore;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
@@ -17,6 +19,12 @@ var storageConnectionString = builder.Configuration.GetConnectionString("AzureSt
 builder.Services.AddSingleton(new TableServiceClient(storageConnectionString));
 builder.Services.AddSingleton(new BlobServiceClient(storageConnectionString));
 builder.Services.AddSingleton(new QueueServiceClient(storageConnectionString));
+
+var sqlConnectionString = builder.Configuration.GetConnectionString("AzureSql")
+    ?? throw new InvalidOperationException("Connection string 'AzureSql' not found.");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(sqlConnectionString, sql => sql.EnableRetryOnFailure()));
 
 var app = builder.Build();
 
